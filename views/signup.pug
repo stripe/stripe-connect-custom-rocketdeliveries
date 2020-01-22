@@ -1,0 +1,117 @@
+extends layout
+
+block content
+  h1.title.short-form
+    if step == 'account'
+      | Create your account
+    else if step == 'profile'
+      | Complete your profile
+  section.form(class={'account': step == 'account', 'profile': step == 'profile'})
+    if error
+      p.error= error
+
+    case step
+      when 'account'
+        form(method='POST', autocomplete='off')
+          fieldset
+            .row(label='Email')
+              input(type='email', name='email', placeholder='jane@example.com', required, autofocus)
+            .row(label='Password')
+              input(type='password', name='password', placeholder='••••••••', required)
+          input.primary(type='submit', value='Continue')
+
+      when 'profile'
+        form(method='POST', autocomplete='off')
+          h4.pilot-header Account type
+          .pilot-options
+            label.pilot-option
+              input(type='radio', name='pilot-type', value='individual', id='po-individual', checked=true)
+              span Independent pilot
+            label.pilot-option
+              input(type='radio', name='pilot-type', value='company', id='po-company')
+              span Company of pilots
+
+          h4.pilot-header#account-info Personal information
+          fieldset
+            .row.pilot-info.individual(label='* First Name')
+              input(type='text', name='firstName', placeholder='Jane')
+            .row.pilot-info.individual(label='* Last Name')
+              input(type='text', name='lastName', placeholder='Diaz')
+            .row.pilot-info.company.hidden(label='* Company Name')
+              input(type='text', name='businessName', placeholder='Infinity & Beyond LLC')
+            .row.select(label='Country')
+              select(name='country')
+                option(value='AU') Australia
+                option(value='AT') Austria
+                option(value='BE') Belgium
+                option(value='CA') Canada
+                option(value='DK') Denmark
+                option(value='EE') Estonia
+                option(value='FI') Finland
+                option(value='FR') France
+                option(value='DE') Germany
+                option(value='GR') Greece
+                option(value='HK') Hong Kong SAR China
+                option(value='IE') Ireland
+                option(value='IT') Italy
+                option(value='JP') Japan
+                option(value='LV') Latvia
+                option(value='LT') Lithuania
+                option(value='LU') Luxembourg
+                option(value='NL') Netherlands
+                option(value='NZ') New Zealand
+                option(value='NO') Norway
+                option(value='PL') Poland
+                option(value='PT') Portugal
+                option(value='SG') Singapore
+                option(value='SK') Slovakia
+                option(value='SI') Slovenia
+                option(value='ES') Spain
+                option(value='SE') Sweden
+                option(value='CH') Switzerland
+                option(value='GB') United Kingdom
+                option(value='US', selected=true) United States
+          aside * Indicates required fields
+          h4 Rocket information
+          fieldset
+            .row(label='Rocket')
+              input(type='text', name='rocket[model]', placeholder='Lightspeed 3000', value='Lightspeed 3000')
+            .row(label='License')
+              input(type='text', name='rocket[license]', placeholder='FUTURE 7', value='FUTURE 7')
+            .row.select(label='Color')
+              select(name='rocket[color]')
+                option(value='red') Red
+                option(value='orange') Orange
+                option(value='yellow') Yellow
+                option(value='green') Green
+                option(value='blue', selected) Blue
+                option(value='purple') Purple
+                option(value='black') Black
+                option(value='white') White
+          h4 Payment information
+          .stripe-information
+            p We use Stripe to make sure you get paid on time and to keep your personal bank and details secure. Click #[strong Save and continue] to set up your payments on Stripe.
+            
+          input.primary(type='submit', value='Save and continue')
+
+      when 'verification'
+        h1.title Verify your identity
+        p We'll ask a few questions to verify your identity for your payouts.
+        a.button.primary(href='/pilots/stripe/verify') Verify your identity
+        a.skip-verification(href='/pilots/dashboard') Skip this for now
+
+block footer
+  .annotation.info
+
+    case step
+      when 'account'
+        p To get started, Rocket Deliveries will create an account for their pilots on their own backend. The platform can use any kind of authentication here, like email or OAuth. A real product would typically have terms of service and a privacy policy linked here as well.
+
+      when 'profile'
+        p The platform can choose to request additional information from the user before it collects any payments details. Here, Rocket Deliveries asks a few questions about pilots and their rockets. This information will be stored in the platform’s database.
+
+      when 'verification'
+        div
+          p This platform uses #[a(href='https://stripe.com/connect/account-types') Connect Custom] accounts to pay its pilots. To enable payouts, we'll need to verify their identity. This step can be skipped and performed at any time by the platform's user.
+          br
+          p In Rocket Deliveries, we collect the identity verification details with #[a(href='https://stripe.com/docs/connect/connect-onboarding') Connect Onboarding] .

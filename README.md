@@ -1,24 +1,22 @@
-# Rocket Rides: Stripe Connect demo
+# Rocket Deliveries: Stripe Connect Custom demo
 
-Rocket Rides is a sample on-demand platform that offers passengers rides with pilots, built on top of [Stripe Connect](https://stripe.com/connect), [Connect Express](https://stripe.com/connect/express), and the [Stripe iOS SDK](https://stripe.com/docs/mobile/ios).
+Rocket Deliveries is a sample on-demand platform that offers passengers rides with pilots, built on top of [Stripe Connect](https://stripe.com/connect), [Connect Custom](https://stripe.com/connect/custom), and [Connect Onboarding for Custom Accounts](https://stripe.com/docs/connect/connect-onboarding). 
 
-**You can try the web app live on [rocketrides.io](https://rocketrides.io).**
+**You can try the web app live on [rocketdeliveries.io](https://rocketdeliveries.io).**
 
-This repository contains two components:
-* [Web server in Node.js](#web-onboarding-for-pilots) to onboard pilots on the web and get them paid
-* [iOS app in Swift](#ios-app-for-passengers) for passengers to request and pay for rides
+This repository contains a [web server in Node.js](#web-onboarding-for-pilots) to onboard pilots and get them paid. [Rocket Rides](https://github.com/stripe/stripe-connect-rocketrides) is a companion demo that uses [Connect Express](https://stripe.com/connect/express) to provide simple onboarding, a hosted dashboard, verification, and payouts management.
 
 ## Web onboarding for pilots
 
-Rocket Rides showcases how to sign up pilots and use [Connect Express accounts](https://stripe.com/connect/account-types) to get them paid. Express provides onboarding, account management, an account dashboard, and identity verification for your platform, and we've customized Express with Rocket Rides branding.
+Rocket Deliveries showcases how to sign up pilots and use [Connect Custom accounts](https://stripe.com/connect/account-types) to get them paid. Custom allows you to control every part of the user experience; accounts can be created directly via the Stripe API. This demo also uses [Connect Onboarding]((https://stripe.com/docs/connect/connect-onboarding)) to provide onboarding and identity verification for your platform, and we've customized Connect Onboarding with Rocket Deliveries branding.
 
 This platform also uses the Stripe API to create payments for pilots, fetch their available and pending balance, and let them view transfers. It also creates [Instant Payouts](https://stripe.com/docs/connect/payouts#instant-payouts) for pilots who use a debit card as their payout account.
 
-<img src="server/public/images/screenshots/rocketrides-web-home.png" width="440"><img src="server/public/images/screenshots/rocketrides-web-connect.png" width="440">
+<img src="public/images/screenshots/rocketdeliveries-home.png" width="440"><img src="public/images/screenshots/rocketdeliveries-connect-onboarding.png" width="440">
 
 To integrate Stripe Connect in your own app, check out these two files in particular:
-1. [`server/routes/pilots/stripe.js`](server/routes/pilots/stripe.js) shows how to easily create Connect Express accounts and interact with the Stripe API.
-2. [`server/routes/pilots/pilots.js`](server/routes/pilots/pilots.js) shows how to create payments going straight to pilots.
+1. [`routes/pilots/stripe.js`](routes/pilots/stripe.js) shows how to easily create Connect Custom accounts and interact with the Stripe API.
+2. [`routes/pilots/pilots.js`](routes/pilots/pilots.js) shows how to create payments going straight to pilots.
 
 ### Requirements
 
@@ -49,32 +47,31 @@ Run the app:
 
 Go to http://localhost:3000 in your browser to start using the app.
 
-## iOS app for passengers
+### Use the Stripe CLI to receive webhook events
 
-The Rocket Rides iOS app is written in Swift and is built using the [Stripe iOS SDK](https://github.com/stripe/stripe-ios) to accept both card payments and Apple Pay.
+Rocket Deliveries relies on webhook events to receive updates from Stripe on a pilot's verification. Webhook events require a public domain, but to quickly get started in a local development environment you can use the [Stripe CLI](https://github.com/stripe/stripe-cli).
 
-<img src="server/public/images/screenshots/rocketrides-ios-ride.png" width="294"><img src="server/public/images/screenshots/rocketrides-ios-location.png" width="294"><img src="server/public/images/screenshots/rocketrides-ios-payment.png" width="294">
+Install the Stripe CLI. If you're using Homebrew on macOS:
 
-### Requirements
+    brew install stripe/stripe-cli/stripe
 
-This project is written in Swift and requires Xcode 8 to build and run, and [CocoaPods](https://guides.cocoapods.org/using/getting-started.html) to install the dependencies. The app is compatible with iOS 10.0+. You can use it both the iOS Simulator or on your iPhone.
+Start the Rocket Deliveries server, then listen for webhook events and forward them to the server:
 
-### Getting started
+    stripe listen --forward-to localhost:3000/pilots/stripe/webhooks
 
-To get started, install the dependencies using CocoaPods:
+## Rocket Rides
 
-    cd ios
-    pod install
+This project is a fork of [Rocket Rides](https://github.com/stripe/stripe-connect-rocketrides), our Connect Express demo that walks through how Express provides onboarding, account management, an account dashboard, and identity verification for platforms. To merge the latest changes from Rocket Rides:
 
-Open `RocketRides.xcworkspace` (not `RocketRides.xcodeproj`) in Xcode. Build and run the app!
+```
+# Add the upstream repository
+git remote add upstream https://github.com/stripe/stripe-connect-rocketrides
 
-To try out the full payment experience, run the server locally as described above, then follow these steps:
-
-1. Create a new pilot using the Rocket Rides web onboarding.
-2. Fill in the `publishableKey` property in `AppDelegate.swift`. You can find your publishable key in your [Stripe Dashboard](https://dashboard.stripe.com/account/apikeys).
-3. Fill in the `baseURLString` property in `AppDelegate.swift`. This should be `http://localhost:3000` if you haven't modified the server configuration.
-4. Relaunch the app! Tapping on "Payment" and "Price" should now work.
-5. Enter a destination, your payment option, and request a ride! You should see the payment in your Stripe Dashboard.
+# Merge upstream changes into this repository
+git fetch upstream
+git checkout master
+git rebase -i upstream/master
+```
 
 ## Credits
 

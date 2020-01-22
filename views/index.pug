@@ -1,0 +1,29 @@
+extends layout
+
+block header
+  .intro
+    .pilots
+      h1 Packages in the blink of an eye
+      h2 Rocket Deliveries is the world’s leading air delivery platform. #[br] Join our elite team of pilots and help people receiv e packages faster than ever.
+      if pilot && pilot.stripeAccountId
+        a.button.primary(href='/pilots/dashboard') View dashboard
+      else
+        a.button.primary(href='/pilots/signup') Become a pilot
+
+block content
+  .features
+    section.schedule
+      h3 Fly when you want
+      p You can be a part of the Rocket Deliveries team anytime—you pick your own schedule. Fly as little or as much as you want.
+    section.earnings
+      h3 Earn more with each trip
+      p Delivery fees increase with time and distance. Cash out whenever you want and get instant transfers to your account.
+    section.app
+      h3 Augmented reality app
+      p Ready, set, download. Get weather updates, directions, and 24/7 support. Don’t have a smartphone? No problem.
+
+block footer
+  .annotation.landing
+    a.stripe(href='https://stripe.com') Stripe
+    p Rocket Deliveries is a #[a(href='https://stripe.com/connect') Stripe Connect] and #[a(href='https://stripe.com/connect/custom') Custom] demo. It is not a real product.
+    a.github.arrow(href='https://github.com/stripe/stripe-connect-custom-rocketdeliveries') View on GitHub

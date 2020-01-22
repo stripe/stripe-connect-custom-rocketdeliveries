@@ -1,0 +1,42 @@
+doctype html
+html
+  head
+    meta(charset='utf-8')
+    meta(name='viewport', content='width=device-width, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no')
+    meta(name='twitter:card', content='summary')
+    meta(name='twitter:site', content='@stripe')
+    meta(name='twitter:title', content='Rocket Deliveries')
+    meta(name='twitter:description', content='Rocket Deliveries is an on-demand platform built on top of Stripe Connect Custom.')
+    meta(name='twitter:image', content='https://rocketdeliveries.io/images/rocketdeliveries.png')
+    title Rocket Deliveries
+    link(rel='stylesheet', type='text/css', href='/stylesheets/rocketdeliveries.css')
+    link(rel='stylesheet', href='https://fonts.googleapis.com/css?family=Barlow:500,600')
+    link(rel='icon', type='image/png', sizes='64x64', href='/images/favicon.png')
+
+  body
+    header
+      #top
+        .logo
+          a.rocketdeliveries(href='/')
+        if pilot
+          .logo
+            a.rocketrides.mark(href='/')
+          .links
+            if pilot.stripeAccountId
+              a(href='/pilots/dashboard') Dashboard
+            a(href='/pilots/logout') Log out
+        else
+          .logo
+            a.rocketrides(href='/')
+          .links
+            a(href='/pilots/login') Log in
+      block header
+
+    #content
+      block content
+
+    footer
+      block footer
+
+    block js
+    script(src='/javascripts/rocketdeliveries.js')

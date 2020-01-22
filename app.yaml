@@ -1,0 +1,13 @@
+# Configuration for Node in App Engine standard on Google Cloud Platform.
+
+runtime: nodejs10
+instance_class: F1
+
+handlers:
+- url: /.*
+  secure: always
+  redirect_http_response_code: 301
+  script: auto
+
+vpc_access_connector:
+  name: projects/rocket-deliveries/locations/us-central1/connectors/rocketdeliveries-mongo
