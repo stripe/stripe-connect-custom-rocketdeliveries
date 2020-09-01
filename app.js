@@ -164,7 +164,7 @@ async function startServer() {
   // Start the server on the correct port
   app.listen(process.env.PORT || config.port, async () => {
     if (config.registerWebhooks) {
-      await registerWebhooks();
+      await registerWebhooks('https://www.rocket.com');
     }
     console.log('📦 Rocket Deliveries server started:', config.publicDomain);
   });
