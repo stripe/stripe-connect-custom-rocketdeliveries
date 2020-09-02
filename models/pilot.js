@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const bcrypt = require('bcryptjs');
 const Ride = require('./ride');
+const Financing = require('./financing');
 
 // Use native promises.
 mongoose.Promise = global.Promise;
@@ -54,6 +55,13 @@ PilotSchema.methods.listRecentRides = function() {
     .sort({ created: -1 })
     .exec();
 };
+
+// Get active financing for the pilot. There should only be one but taking most recent to be safe
+PilotSchema.methods.getActiveFinancing = function() {
+  return Financing.findOne({ pilot: this, status: {$nin: ['completed', 'expired']}})
+  .sort({ created: -1 })
+  .exec();
+}
 
 // Generate a password hash (with an auto-generated salt for simplicity here).
 PilotSchema.methods.generateHash = function(password) {
