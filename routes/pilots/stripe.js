@@ -40,6 +40,58 @@ router.get('/verify', pilotRequired, async (req, res) => {
   }
 });
 
+
+/**
+ * GET /pilots/stripe/capital/apply
+  *
+ * Redirect to Stripe and use Hosted Capital to apply for financing.
+ */
+router.get('/capital/apply', pilotRequired, async (req, res) => {
+  const pilot = req.user;
+  try {
+    // Create a Stripe Account link for the Connect Onboarding flow
+    const accountLink = await stripe.accountLinks.create({
+      type: 'capital_financing_offer',
+      account: pilot.stripeAccountId,
+      success_url: config.publicDomain + '/pilots/dashboard',
+      // In the case of a failure, e.g. the link expired or the account was rejected,
+      // redirect the user to this URL to refresh the Account Link.
+      failure_url: config.publicDomain + '/pilots/capital/apply'
+    });
+    // Redirect to Stripe to start the Connect Onboarding flow.
+    res.redirect(accountLink.url);
+  } catch (err) {
+    console.log('Error generating Hosted Capital URL: ', err);
+    return res.redirect('/pilots/dashboard');
+  }
+});
+
+
+/**
+ * GET /pilots/stripe/capital/reporting
+  *
+ * Redirect to Stripe and use Hosted Capital to show financing reporting.
+ */
+router.get('/capital/reporting', pilotRequired, async (req, res) => {
+  const pilot = req.user;
+  try {
+    // Create a Stripe Account link for the Connect Onboarding flow
+    const accountLink = await stripe.accountLinks.create({
+      type: 'capital_financing_reporting',
+      account: pilot.stripeAccountId,
+      success_url: config.publicDomain + '/pilots/dashboard',
+      // In the case of a failure, e.g. the link expired or the account was rejected,
+      // redirect the user to this URL to refresh the Account Link.
+      failure_url: config.publicDomain + '/pilots/capital/reporting'
+    });
+    // Redirect to Stripe to start the Connect Onboarding flow.
+    res.redirect(accountLink.url);
+  } catch (err) {
+    console.log('Error generating Hosted Capital URL: ', err);
+    return res.redirect('/pilots/dashboard');
+  }
+});
+
 /**
  * POST /pilots/stripe/webhooks
  * 

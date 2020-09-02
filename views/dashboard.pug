@@ -13,6 +13,10 @@ block header
     .message
       strong Your account has been verified. 
       | Fire up your rocket and take your first deliveries.
+  .banner.financing-offer(class={"showing": stripeFinancingOffer})
+    .message
+      strong You are eligible for financing through Stripe.
+      |&nbsp; #[a(href="/pilots/stripe/capital/apply") Click here for details >]
 
 block content
   .dashboard
@@ -33,6 +37,9 @@ block content
       .block.stripe
         form.payout(action='/pilots/stripe/payout', method='POST', autocomplete='off')
           input(class='primary' type='submit', value='Pay out now' disabled=(balanceAvailable===0))
+        if stripeFinancingProgress
+          form.payout(action='/pilots/stripe/capital/reporting', method='GET', autocomplete='off')
+            input(class='primary' type='submit', value='View financing' disabled=(balanceAvailable===0))
         if !stripeVerified
           if stripeVerifiedReason === 'requirements.pending_verification'
             p#verified Account verification is pending

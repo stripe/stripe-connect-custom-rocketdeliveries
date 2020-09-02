@@ -160,6 +160,10 @@ router.get('/dashboard', pilotRequired, async (req, res) => {
   // Get the pilot's verified status on Stripe
   const stripeVerified = await isStripeVerified(pilot);
   const [showBanner] = req.flash('showBanner');
+
+  // Look up the active financing for the pilot
+  const stripeFinancing = await pilot.getActiveFinancing();
+
   // There is one balance for each currencies used: as this 
   // demo app only uses USD we'll just use the first object
   res.render('dashboard', {
@@ -170,7 +174,9 @@ router.get('/dashboard', pilotRequired, async (req, res) => {
     rides: rides,
     showBanner: !!showBanner || req.query.showBanner,
     stripeVerified: stripeVerified.verified,
-    stripeVerifiedReason: stripeVerified.reason || null
+    stripeVerifiedReason: stripeVerified.reason || null,
+    stripeFinancingOffer: stripeFinancing && (stripeFinancing.status === 'undelivered' || stripeFinancing.status === 'delivered'),
+    stripeFinancingProgress: stripeFinancing && stripeFinancing.status === 'accepted'
   });
 });
 
