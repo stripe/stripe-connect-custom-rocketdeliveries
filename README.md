@@ -24,7 +24,10 @@ You'll need a Stripe account to manage pilot onboarding and payments. [Sign up f
 
 For Instant Payouts to work, you'll need to [turn off automatic payouts](https://dashboard.stripe.com/account/payouts) in your settings.
 
-You'll need to have [Node.js](http://nodejs.org) >= 7.x and [MongoDB](http://mongodb.org) installed to run this app.
+You'll need to have [Node.js](http://nodejs.org) >= 7.x and [MongoDB](http://mongodb.org) installed to run this app. Using Homebrew, you can install mongodb:
+
+    brew tap mongodb/brew
+    brew install mongodb-community
 
 ### Getting started
 
@@ -39,7 +42,7 @@ Copy the configuration file and add your own [Stripe API keys](https://dashboard
 
 Make sure MongoDB is running. If you're using Homebrew on macOS:
 
-    brew services start mongodb
+    brew services start mongodb-community
 
 Run the app:
 
