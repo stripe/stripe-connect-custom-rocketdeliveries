@@ -132,7 +132,7 @@ app.use((err, req, res) => {
 async function registerWebhooks(webhooksDomain) {
   // Define the webhooks endpoint on this server
   const webhooksEndpoint = '/pilots/stripe/webhooks';
-  const url = webhooksDomain + webhooksEndpoint || config.publicDomain + webhooksEndpoint;
+  const url = (webhooksDomain || config.publicDomain) + webhooksEndpoint;
 
   let createdWebhookEndpoint;
   try {
