@@ -9,6 +9,7 @@ const LocalStrategy = require('passport-local').Strategy;
 const Pilot = require('../../models/pilot');
 const Ride = require('../../models/ride');
 const Passenger = require('../../models/passenger');
+const Financing = require('../../models/financing');
 
 // Middleware: require a logged-in pilot
 function pilotRequired(req, res, next) {
@@ -152,6 +153,22 @@ router.get('/dashboard', pilotRequired, async (req, res) => {
   const balance = await stripe.balance.retrieve({
     stripe_account: pilot.stripeAccountId,
   });
+
+  // Retrieve and format the financing related balance transactions from Stripe
+  const formattedFinancingBts = []
+  const financingBts = await stripe.balanceTransactions.list({
+    stripeAccount: pilot.stripeAccountId,
+  }).autoPagingEach(function(bt) {
+    if (bt['type'] === 'financing_paydown' || bt['type'] === 'financing_payout') {
+      const btType = bt['type'].split('_')[1]
+      formattedFinancingBts.push({
+        'type': btType.charAt(0).toUpperCase() + btType.slice(1),
+        'amount': (bt['amount']/ 100).toFixed(2),
+        'date': bt['created'] * 1000
+      })
+    }
+  });
+
   // Fetch the pilot's recent rides
   const rides = await pilot.listRecentRides();
   const ridesTotalAmount = rides.reduce((a, b) => {
@@ -176,8 +193,19 @@ router.get('/dashboard', pilotRequired, async (req, res) => {
     stripeVerified: stripeVerified.verified,
     stripeVerifiedReason: stripeVerified.reason || null,
     stripeFinancingOffer: stripeFinancing && (stripeFinancing.status === 'undelivered' || stripeFinancing.status === 'delivered'),
-    stripeFinancingProgress: stripeFinancing && stripeFinancing.status === 'accepted'
+    stripeFinancingProgress: stripeFinancing && stripeFinancing.status === 'accepted',
+    financingBts: formattedFinancingBts
   });
+
+  if (stripeFinancing.status === 'undelivered') {
+    try {
+      // Mark financing as delivered since we are displaying it to the user
+      await stripeFinancing.markDelivered()
+    } catch(err) {
+      console.log(err);
+      next(err);
+    }
+  }
 });
 
 

@@ -938,6 +938,11 @@ form a.button {
   text-align: right;
 }
 
+.financing {
+  margin-top: 25px;
+  margin-bottom: 150px;
+}
+
 /* Media queries */
 @media screen and (max-width: 500px) {
   /* Intro section */

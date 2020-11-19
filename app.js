@@ -55,7 +55,7 @@ app.use(
   express.json({
     // Parse the raw body only when hitting the Stripe webhook endpoint.
     verify: function(req, res, buf) {
-      if (req.originalUrl.startsWith('/stripe/webhooks')) {
+      if (req.originalUrl === '/pilots/stripe/webhooks') {
         req.rawBody = buf.toString();
       }
     }

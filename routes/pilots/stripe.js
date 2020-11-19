@@ -5,6 +5,7 @@ const stripe = require('stripe')(config.stripe.secretKey);
 const Pilot = require('../../models/pilot');
 const express = require('express');
 const router = express.Router();
+const Financing = require('../../models/financing');
 
 // Middleware that requires a logged-in pilot
 function pilotRequired(req, res, next) {
@@ -92,6 +93,61 @@ router.get('/capital/reporting', pilotRequired, async (req, res) => {
   }
 });
 
+async function updateAccount(accountData) {
+  try {
+    // Find the pilot with the connected account ID
+    const pilot = await Pilot.findOne({
+      stripeAccountId: accountData.id
+    })
+
+    // For unverified pilots, check if Stripe is notifying us that they're now verified (and payouts are enabled)
+    if (!pilot.stripeVerified && accountData.verification.status === 'verified' && accountData.payouts_enabled) {
+      // Record them as verified
+      console.log(`Webhook event: new verified pilot - ${pilot}`);
+      pilot.set({stripeVerified: true});
+      await pilot.save();
+    }
+  }
+  catch (e) {
+    console.log(`Unknown pilot with account ID ${accountData.id}`);
+  }
+}
+
+async function createFinancing(financingData) {
+  try {
+    // Look up pilot 
+    const pilot = await Pilot.findOne({
+      stripeAccountId: financingData.account
+    })
+
+    // Create financing
+    const financing = new Financing({
+      pilot: pilot.id,
+      status: financingData.status,
+      stripeFinancingId: financingData.id
+    })
+    await financing.save()
+  }
+  catch (e) {
+    console.log(`Unable to create financing with Stripe ID ${financingData.id}`);
+  }
+}
+
+async function updateFinancingStatus(financingData) {
+  // The remaining financing_offer webhooks are triggered by status changes so we can handle the same way
+  try {
+    // Look up existing financing
+    const financing = await Financing.findOne({
+      stripeFinancingId: financingData.id
+    })
+
+    financing.set({status: financingData['status']})
+    await financing.save()
+  }
+  catch (e) {
+    console.log(`Unable to look up financing with Stripe ID ${financingData.id}`);
+  }
+}
 /**
  * POST /pilots/stripe/webhooks
  * 
@@ -102,31 +158,23 @@ router.post('/webhooks', async (req, res)=> {
   const webhookSignature = req.headers['stripe-signature'];
   let event;
   try {
-    event = stripe.webhooks.constructEvent(req.body, webhookSignature, req.app.get('webhookSecret'));
+    event = stripe.webhooks.constructEvent(req.rawBody, webhookSignature, config.endpointSecret);
   } catch (e) {
     return res.status(400).send(`Webhook error: ${e.message}`);
   }
-  // The account.updated event is sent to this webhook endpoint whenever a connected account is updated.
-  if (event.type === 'account.updated') {
-    const account = event.data;
 
-    try {
-      // Find the pilot with the connected account ID
-      const pilot = await Pilot.findOne({
-        stripeAccountId: account.id
-      })
-
-      // For unverified pilots, check if Stripe is notifying us that they're now verified (and payouts are enabled)
-      if (!pilot.stripeVerified && account.verification.status === 'verified' && account.payouts_enabled) {
-        // Record them as verified
-        console.log(`Webhook event: new verified pilot - ${pilot}`);
-        pilot.set({stripeVerified: true});
-        await pilot.save();
-      }
-    }
-    catch (e) {
-      console.log(`Unknown pilot with account ID ${account.id}`);
-    }
+  switch (event.type) {
+    case 'account.updated':
+      await updateAccount(event.data);
+      break;
+    case 'capital.financing_offer.created':
+      await createFinancing(event.data.object);
+      break;
+    case 'capital.financing_offer.accepted':
+    case 'capital.financing_offer.expired':
+    case 'capital.financing_offer.completed':
+      await updateFinancingStatus(event.data.object);
+      break;
   }
   // Stripe needs to receive a 200 status from any webhooks endpoint
   res.sendStatus(200);

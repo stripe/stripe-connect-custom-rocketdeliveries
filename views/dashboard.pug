@@ -63,6 +63,23 @@ block content
               .cell.date= moment(new Date(Date.parse(ride.created))).calendar()
               .cell.price $#{(ride.amountForPilot() / 100).toFixed(2)}
 
+    if stripeFinancingProgress
+      .financing
+        section.rides
+          h4 Financing
+          if financingBts.length == 0
+            .no-rides
+              .rocket
+              h1 No payouts or paydowns
+          else
+            .list
+              each financingBt in financingBts
+                .row
+                  .cell.name= financingBt['type']
+                  .cell.date= moment(new Date(financingBt['date'])).calendar()
+                  .cell.price $#{financingBt['amount']}
+
+
 block footer
   .annotation.card.dashboard-banner(class=(showBanner ? '' : 'hidden'))
     h4 The Connect Custom account for this delivery pilot has been created.
