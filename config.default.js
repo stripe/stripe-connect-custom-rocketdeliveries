@@ -27,6 +27,15 @@ module.exports = {
     clientId: 'YOUR_STRIPE_CLIENT_ID',
   },
 
+  //sslKey: '/path/to/private/key',
+  //sslCrt: '/path/to/crt',
+  
+  // This is optional when enabling HTTPs support
+  //caCrt: '/path/to/ca',
+
+  // Is a redirect from HTTP (TCP 80) needed? Note that you can only start a listener on TCP 80 as a super user since it's a well known port
+  redirectHttp: false,
+
   // Configuration for MongoDB
   mongoUri: 'mongodb://localhost/rocketdeliveries',
 

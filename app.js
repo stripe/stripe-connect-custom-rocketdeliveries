@@ -11,6 +11,9 @@ const flash = require('express-flash');
 const bodyParser = require('body-parser');
 const moment = require('moment');
 const stripe = require('stripe')(config.stripe.secretKey);
+const fs = require('fs');
+const https = require('https');
+const http = require('http');
 
 const app = express();
 app.set('trust proxy', true);
@@ -161,13 +164,40 @@ async function registerWebhooks(webhooksDomain) {
    events with the signed secret key.
 */
 async function startServer() {
-  // Start the server on the correct port
-  app.listen(process.env.PORT || config.port, async () => {
-    if (config.registerWebhooks) {
-      await registerWebhooks();
+
+    // if HTTPs is needed and we have the cert and private key paths in the config
+    if (config.sslKey && config.sslCrt){
+	var sslOptions = {
+	    key: fs.readFileSync(config.sslKey),
+	    cert: fs.readFileSync(config.sslCrt),
+	    ca: config.sslCa ? fs.readFileSync(config.sslCa):null,
+	    requestCert: true,
+	    rejectUnauthorized: false
+	};
+	var server = https.createServer(sslOptions, app).listen(process.env.PORT || config.port, async function() {
+	    if (config.registerWebhooks) {
+		await registerWebhooks();
+	    }
+	    console.log('📦 Rocket Deliveries server started:', config.publicDomain);
+	});
+	// Is a redirect from HTTP (TCP 80) needed? Note that you can only start a listener on TCP 80 as a super user since it's a well known port
+	if (config.redirect_http === 'true'){
+		// Redirect from http port 80 to https
+		http.createServer(function (req, res) {
+		    res.writeHead(301, { "Location": "https://" + req.headers['host'].replace('80',app.get('port')) + req.url });
+		    res.end();
+		}).listen(80);
+	}
+
+    // If SSL cert and key directives are unset, start a HTTP server
+    }else{
+	app.listen(process.env.PORT || config.port, async () => {
+	    if (config.registerWebhooks) {
+		await registerWebhooks();
+	    }
+	    console.log('📦 Rocket Deliveries server started:', config.publicDomain);
+	});
     }
-    console.log('📦 Rocket Deliveries server started:', config.publicDomain);
-  });
 }
 
 startServer();
