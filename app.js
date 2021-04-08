@@ -131,15 +131,15 @@ app.use((err, req, res) => {
 */
 async function registerWebhooks(webhooksDomain) {
   // Define the webhooks endpoint on this server
-  const webhooksEndpoint = '/pilots/stripe/webhooks';
-  const url = webhooksDomain + webhooksEndpoint || config.publicDomain + webhooksEndpoint;
+  let url = webhooksDomain || config.publicDomain;
+  url = url.concat('/pilots/stripe/webhooks')
 
   let createdWebhookEndpoint;
   try {
     // Look up the existing webhook endpoints for this account
-    const {data: existingWebhooks} = await stripe.webhookEndpoints.list();
+    const {data: existingEndpoints} = await stripe.webhookEndpoints.list();
     // If there's an existing registered webhook endpoint, delete it (we'll recreate it next)
-    const existing = existingWebhooks.find(endpoint => endpoint.url === url)
+    const existing = existingEndpoints.find(endpoint => endpoint.url === url)
     if (existing) {
       await stripe.webhookEndpoints.del(existing.id);
     }
@@ -149,11 +149,12 @@ async function registerWebhooks(webhooksDomain) {
       connect: true,
       url
     });
+
+    // Set the webhook signing secret, so we can verify the webhooks we receive are from Stripe
+    app.set('webhookSecret', createdWebhookEndpoint.secret);
   } catch (e) {
     console.log('Error registering webhook:', e);
   }
-  // Set the webhook signing secret, so we can verify the webhooks we receive are from Stripe
-  app.set('webhookSecret', createdWebhookEndpoint.secret);
 }
 
 /* Start the server (but first register a webhook endpoint with Stripe). 
