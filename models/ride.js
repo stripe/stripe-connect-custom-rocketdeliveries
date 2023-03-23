@@ -8,8 +8,8 @@ mongoose.Promise = global.Promise;
 
 // Define the Ride schema.
 const RideSchema = new Schema({
-  pilot: { type : Schema.ObjectId, ref : 'Pilot', required: true },
-  passenger: { type : Schema.ObjectId, ref : 'Passenger', required: true },
+  pilot: { type: Schema.ObjectId, ref: 'Pilot', required: true },
+  passenger: { type: Schema.ObjectId, ref: 'Passenger', required: true },
   origin: { type: [Number], index: '2d', sparse: true, default: [37.7765030, -122.3920385] },
   destination: { type: [Number], index: '2d', sparse: true, default: [37.8199286, -122.4782551] },
   pickupTime: { type: Date, default: Date.now },
@@ -23,9 +23,7 @@ const RideSchema = new Schema({
 });
 
 // Return the ride amount for the pilot after collecting 20% platform fees.
-RideSchema.methods.amountForPilot = function() {
-  return parseInt(this.amount * 0.8);
-};
+RideSchema.methods.amountForPilot = () => (~~this.amount) * 0.8;
 
 const Ride = mongoose.model('Ride', RideSchema);
 

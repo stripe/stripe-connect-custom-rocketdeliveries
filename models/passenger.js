@@ -34,9 +34,7 @@ PassengerSchema.statics.getLatest = async function() {
       await Passenger.insertDefaultPassengers();
     }
     // Return latest passenger.
-    return Passenger.findOne()
-      .sort({ created: -1 })
-      .exec();
+    return Passenger.findOne().sort({ created: -1 }).exec();
   } catch (err) {
     console.log(err);
   }

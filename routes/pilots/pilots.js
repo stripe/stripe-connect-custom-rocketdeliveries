@@ -154,9 +154,7 @@ router.get('/dashboard', pilotRequired, async (req, res) => {
   });
   // Fetch the pilot's recent rides
   const rides = await pilot.listRecentRides();
-  const ridesTotalAmount = rides.reduce((a, b) => {
-    return a + b.amountForPilot();
-  }, 0);
+  const ridesTotalAmount = rides.reduce((a, b) =>  a + b.amountForPilot(), 0);
   // Get the pilot's verified status on Stripe
   const stripeVerified = await isStripeVerified(pilot);
   const [showBanner] = req.flash('showBanner');
